@@ -1,3 +1,13 @@
+# Use valgrind if its installed
+find_program(
+  VALGRIND_EXE
+  valgrind)
+
+if (VALGRIND_EXE)
+  set(VALGRIND_CMD "${VALGRIND_EXE}" "--error-exitcode=1" "--trace-children=yes" "--leak-check=full" "--show-leak-kinds=definite")
+  set(VALGRIND_CMD "${VALGRIND_EXE}" "--errors-for-leak-kinds=definite" "--track-fds=yes" "--num-callers=128")
+endif()
+
 set (GMOCK_ROOT_DIR
      "/usr/src/gmock"
      CACHE
@@ -67,7 +77,7 @@ if (GTEST_SRC_DIR AND
   add_executable        (gtest_test_queue ${GTEST_BACKEND_SOURCE})
   target_link_libraries (gtest_test_queue ${GTEST_GMOCK_LIB})
 
-  add_custom_target (check COMMAND gtest_test_queue)
+  add_custom_target (check COMMAND ${VALGRIND_CMD} ${CMAKE_BINARY_DIR}/gtest_test_queue)
 
 endif (GTEST_SRC_DIR AND
        GMOCK_LIB AND
