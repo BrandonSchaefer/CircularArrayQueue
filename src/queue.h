@@ -107,7 +107,7 @@ public:
 
     void resize(size_t new_size)
     {
-        auto new_queue = new T[new_size]();
+        auto new_queue = new T[new_size + 1]();
         auto elem_size = std::min(new_size, size());
 
         // Need to copy from the front index to the back index to the new queue

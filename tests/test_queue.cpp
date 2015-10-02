@@ -92,3 +92,48 @@ TEST_F(TestQueue, ResizeShrinkWithElements)
     q.resize(elems / 2);
     EXPECT_EQ(q.size(), elems / 2);
 }
+
+TEST_F(TestQueue, EnqueueDequeueLargeNumber)
+{
+    size_t elems = 10000;
+    for (size_t i = 0; i < elems; i++)
+        q.enqueue(i);
+
+    for (size_t i = 0; i < elems / 2; i++)
+        EXPECT_EQ(q.dequeue(), (int)i);
+
+    for (size_t i = 0; i < elems / 2; i++)
+        q.enqueue(i);
+
+    EXPECT_EQ(q.size(), elems);
+}
+
+TEST_F(TestQueue, ShrinkEnqueueDequeueLargeNumber)
+{
+    size_t elems = 10000;
+    for (size_t i = 0; i < elems; i++)
+        q.enqueue(i);
+
+    q.resize(elems / 2);
+    EXPECT_EQ(q.size(), elems / 2);
+
+    for (size_t i = 0; i < elems / 2; i++)
+        EXPECT_EQ(q.dequeue(), (int)i);
+
+    for (size_t i = 0; i < elems / 2; i++)
+        q.enqueue(i);
+
+    EXPECT_EQ(q.size(), elems / 2);
+}
+
+TEST_F(TestQueue, EnqueueDequeueFIFO)
+{
+    size_t elems = 1000;
+    for (size_t i = 0; i < elems; i++)
+        q.enqueue(i);
+
+    for (size_t i = 0; i < elems; i++)
+        EXPECT_EQ(q.dequeue(), (int)i);
+
+    EXPECT_TRUE(q.empty());
+}
