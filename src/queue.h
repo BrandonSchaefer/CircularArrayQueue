@@ -74,9 +74,6 @@ public:
           max_size_(q.max_size_)
     {
         q.queue_ = nullptr;
-        q.front_ = 0;
-        q.back_  = 0;
-        q.max_size_ = 0;
     }
 
     // copy assignment
@@ -95,6 +92,73 @@ public:
         std::swap(back_,  q.back_);
         std::swap(max_size_, q.max_size_);
         return *this;
+    }
+
+    class iterator : public std::iterator<std::forward_iterator_tag, ds::queue<T>>
+    {
+    public:
+        iterator(T* queue, size_t index = 0, size_t max_size = 0)
+            : queue_(queue),
+              current_(queue),
+              index_(index),
+              max_size_(max_size)
+        {
+        }
+
+        iterator operator++()
+        {
+            auto pre = *this;
+            increment();
+            return pre;
+        }
+
+        iterator operator++(int n)
+        {
+            increment();
+            return *this;
+        }
+
+        T& operator*()
+        {
+            return *current_;
+        }
+
+        T* operator->()
+        {
+            return current_;
+        }
+
+        bool operator==(iterator const& rhs)
+        {
+            return current_ == rhs.current_;
+        }
+
+        bool operator!=(iterator const& rhs)
+        {
+            return current_ != rhs.current_;
+        }
+
+    private:
+        void increment()
+        {
+            index_   = (index_ + 1) % max_size_;
+            current_ = queue_ + index_;
+        }
+
+        T* queue_;
+        T* current_;
+        size_t index_;
+        size_t max_size_;
+    };
+
+    iterator begin()
+    {
+        return iterator(queue_, front_, max_size_);
+    }
+
+    iterator end()
+    {
+        return iterator(queue_ + back_);
     }
 
     void resize(size_t new_size)

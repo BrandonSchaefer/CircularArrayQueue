@@ -45,6 +45,18 @@ TEST_F(TestQueue, CopyConstructor)
     EXPECT_TRUE(q2.empty());
 }
 
+TEST_F(TestQueue, MoveConstructor)
+{
+    ds::queue<int> q2(std::move(ds::queue<int>()));
+    EXPECT_TRUE(q2.empty());
+}
+
+TEST_F(TestQueue, MoveAssignmentConstructor)
+{
+    q = ds::queue<int>();
+    EXPECT_TRUE(q.empty());
+}
+
 TEST_F(TestQueue, CopyAssignmentConstructor)
 {
     int elem = 10;
@@ -62,6 +74,27 @@ TEST_F(TestQueue, EnqueueDequeue)
     q.enqueue(elem);
     EXPECT_EQ(q.dequeue(), elem);
     EXPECT_TRUE(q.empty());
+}
+
+TEST_F(TestQueue, IteratorBegin)
+{
+    int elem = 1;
+    q.enqueue(elem);
+
+    EXPECT_EQ(*q.begin(), elem);
+}
+
+TEST_F(TestQueue, IteratorRange)
+{
+    size_t elems = 10;
+    for (size_t i = 0; i < elems; i++)
+        q.enqueue(i);
+
+    int i = 0;
+    for (auto it = q.begin(); it != q.end(); ++it)
+        EXPECT_EQ(*it, i++);
+
+    EXPECT_EQ(q.size(), elems);
 }
 
 TEST_F(TestQueue, DequeueEmpty)
