@@ -27,7 +27,8 @@ namespace ds
 
 namespace
 {
-    size_t const default_max_size = 2;
+    size_t const default_max_size{2};
+    float const  default_increase_size{2};
 }
 
 template <typename T, typename Alloc = std::allocator<T>>
@@ -134,9 +135,18 @@ public:
     void enqueue(T const& value)
     {
         if (size() + 1 >= max_size_)
-            resize(max_size_ * 2);
+            resize(max_size_ * default_increase_size);
 
         queue_[back_] = value;
+        back_ = (back_ + 1) % max_size_;
+    }
+
+    void enqueue(T const&& value)
+    {
+        if (size() + 1 >= max_size_)
+            resize(max_size_ * default_increase_size);
+
+        queue_[back_] = std::move(value);
         back_ = (back_ + 1) % max_size_;
     }
 
