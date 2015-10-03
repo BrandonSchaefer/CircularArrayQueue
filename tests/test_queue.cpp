@@ -108,6 +108,12 @@ TEST_F(TestQueue, EnqueueDequeueLargeNumber)
     EXPECT_EQ(q.size(), elems);
 }
 
+TEST_F(TestQueue, ResizeEmptyQueue)
+{
+    EXPECT_TRUE(q.empty());
+    q.resize(5);
+}
+
 TEST_F(TestQueue, ShrinkEnqueueDequeueLargeNumber)
 {
     size_t elems = 10000;
@@ -117,13 +123,29 @@ TEST_F(TestQueue, ShrinkEnqueueDequeueLargeNumber)
     q.resize(elems / 2);
     EXPECT_EQ(q.size(), elems / 2);
 
-    for (size_t i = 0; i < elems / 2; i++)
+    for (size_t i = 0; i < elems / 4; i++)
         EXPECT_EQ(q.dequeue(), (int)i);
 
-    for (size_t i = 0; i < elems / 2; i++)
+    for (size_t i = 0; i < elems / 4; i++)
         q.enqueue(i);
 
     EXPECT_EQ(q.size(), elems / 2);
+}
+
+TEST_F(TestQueue, EnqueueDequeueWrapResize)
+{
+    ds::queue<int> set_size(2);
+
+    // Move b up 1, then front up 1, then back twice to wrap and resize
+    set_size.enqueue(1);
+    set_size.dequeue();
+    set_size.enqueue(2);
+    set_size.enqueue(3);
+
+    EXPECT_EQ(set_size.size(),    (size_t)2);
+    EXPECT_EQ(set_size.dequeue(), 2);
+    EXPECT_EQ(set_size.dequeue(), 3);
+    EXPECT_EQ(set_size.size(),    (size_t)0);
 }
 
 TEST_F(TestQueue, EnqueueDequeueFIFO)

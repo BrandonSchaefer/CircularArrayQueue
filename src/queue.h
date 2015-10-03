@@ -27,36 +27,28 @@ namespace ds
 
 namespace
 {
-    size_t const default_max_size = 10;
+    size_t const default_max_size = 2;
 }
 
-template <typename T>
+template <typename T, typename Alloc = std::allocator<T>>
 class queue
 {
 public:
-    queue()
-        : queue_(new T[default_max_size]()),
-          front_(0),
-          back_(0),
-          max_size_(default_max_size)
-    {
-    }
+    queue() = default;
 
     explicit queue(size_t size)
-        : queue_(new T[size]()),
-          front_(0),
-          back_(0),
+        : queue_(allocator_.allocate(size)),
           max_size_(size)
     {
     }
 
     ~queue()
     {
-        delete[] queue_;
+        allocator_.deallocate(queue_, max_size_);
     }
 
     queue(queue const& q)
-        : queue_(new T[q.max_size_]),
+        : queue_(allocator_.allocate(q.max_size_)),
           front_(q.front_),
           back_(q.back_),
           max_size_(q.max_size_)
@@ -66,8 +58,7 @@ public:
 
     // init_list ctor
     queue(std::initializer_list<T> const& s)
-        : queue_(new T[s.size() + 1]),
-          front_(0),
+        : queue_(allocator_.allocate(size + 1)),
           back_(s.size()),
           max_size_(s.size() + 1)
     {
@@ -107,18 +98,37 @@ public:
 
     void resize(size_t new_size)
     {
-        auto new_queue = new T[new_size + 1]();
+        auto new_queue = allocator_.allocate(new_size + 1);
         auto elem_size = std::min(new_size, size());
 
-        // Need to copy from the front index to the back index to the new queue
-        std::copy(queue_ + front_, queue_ + elem_size, new_queue);
+        if (elem_size > 0)
+        {
+            // We are linear copy front --> elem_size
+            if (front_ < back_)
+            {
+                std::uninitialized_copy(queue_ + front_, queue_ + elem_size, new_queue);
+            }
+            // We are split up, need to copy front --> end_of_elems, then 0 --> back_
+            else
+            {
+                size_t front_half = max_size_ - front_;
+                size_t back_half  = back_ - 1;
+
+                 // We are shinking, and only need to copy up to elem_size (not past)
+                 if (elem_size < back_half)
+                     back_half = elem_size;
+
+                 std::uninitialized_copy_n(queue_ + front_, front_half, new_queue);
+                 std::uninitialized_copy_n(queue_, back_half, new_queue + front_half);
+            }
+        }
+
+        allocator_.deallocate(queue_, max_size_);
 
         back_     = elem_size;
         front_    = 0;
         max_size_ = new_size + 1;
-
-        delete[] queue_;
-        queue_ = new_queue;
+        queue_    = new_queue;
     }
 
     void enqueue(T const& value)
@@ -156,11 +166,12 @@ public:
     }
 
 private:
-    T* queue_;
+    std::allocator<T> allocator_;
+    T* queue_{allocator_.allocate(default_max_size)};
 
-    size_t front_;
-    size_t back_;
-    size_t max_size_;
+    size_t front_{0};
+    size_t back_{0};
+    size_t max_size_{default_max_size};
 };
 
 } // namespace ds
