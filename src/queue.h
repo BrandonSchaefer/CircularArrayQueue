@@ -31,6 +31,14 @@ namespace
     float const  default_increase_size{2};
 }
 
+static size_t increment(size_t index, size_t max)
+{
+    if (index + 1 >= max)
+        return (index + 1) % max;
+     else
+         return ++index;
+}
+
 template <typename T, typename Alloc = std::allocator<T>>
 class queue
 {
@@ -49,7 +57,8 @@ public:
     }
 
     queue(queue const& q)
-        : queue_(allocator_.allocate(q.max_size_)),
+        : allocator_(q.allocator_),
+          queue_(allocator_.allocate(q.max_size_)),
           front_(q.front_),
           back_(q.back_),
           max_size_(q.max_size_)
@@ -108,13 +117,15 @@ public:
         iterator operator++()
         {
             auto pre = *this;
-            increment();
+            index_ = increment(index_, max_size_);
+            current_ = queue_ + index_;
             return pre;
         }
 
         iterator operator++(int n)
         {
-            increment();
+            index_ = increment(index_, max_size_);
+            current_ = queue_ + index_;
             return *this;
         }
 
@@ -139,12 +150,6 @@ public:
         }
 
     private:
-        void increment()
-        {
-            index_   = (index_ + 1) % max_size_;
-            current_ = queue_ + index_;
-        }
-
         T* queue_;
         T* current_;
         size_t index_;
@@ -202,7 +207,7 @@ public:
             resize(max_size_ * default_increase_size);
 
         queue_[back_] = value;
-        back_ = (back_ + 1) % max_size_;
+        back_ = increment(back_, max_size_);
     }
 
     void enqueue(T const&& value)
@@ -211,7 +216,7 @@ public:
             resize(max_size_ * default_increase_size);
 
         queue_[back_] = std::move(value);
-        back_ = (back_ + 1) % max_size_;
+        back_ = increment(back_, max_size_);
     }
 
     T dequeue()
@@ -221,7 +226,7 @@ public:
 
         auto elem = queue_[front_];
         queue_[front_] = T{};
-        front_ = (front_ + 1) % max_size_;
+        front_ = increment(front_, max_size_);
 
         return elem;
     }
@@ -233,8 +238,15 @@ public:
 
     size_t size() const
     {
-        if (max_size_ > 0)
-            return (max_size_ - (front_ -  back_)) % max_size_;
+        if (front_ > back_)
+        {
+            if (max_size_ > 0)
+                return (max_size_ - (front_ -  back_)) % max_size_;
+        }
+        else
+        {
+            return back_ - front_;
+        }
 
         return 0;
     }
