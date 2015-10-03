@@ -114,40 +114,36 @@ public:
         {
         }
 
-        iterator operator++()
+        iterator& operator++()
         {
-            auto pre = *this;
-            index_ = increment(index_, max_size_);
-            current_ = queue_ + index_;
-            return pre;
-        }
-
-        iterator operator++(int n)
-        {
-            index_ = increment(index_, max_size_);
+            index_   = increment(index_, max_size_);
             current_ = queue_ + index_;
             return *this;
         }
 
-        T& operator*()
+        iterator operator++(int)
         {
-            return *current_;
+            auto pre = *this;
+            index_   = increment(index_, max_size_);
+            current_ = queue_ + index_;
+            return pre;
         }
 
-        T* operator->()
+        iterator& operator=(iterator const& rhs)
         {
-            return current_;
+            queue_    = rhs.queue_;
+            current_  = rhs.current_;
+            index_    = rhs.index_;
+            max_size_ = rhs.max_size_;
+            return *this;
         }
 
-        bool operator==(iterator const& rhs)
-        {
-            return current_ == rhs.current_;
-        }
+        iterator& operator=(T const& rhs) { *current_ = rhs; return *this; }
 
-        bool operator!=(iterator const& rhs)
-        {
-            return current_ != rhs.current_;
-        }
+        T& operator*() const { return *current_; }
+        T* operator->() const { return current_; }
+        bool operator==(iterator const& rhs)const  { return current_ == rhs.current_; }
+        bool operator!=(iterator const& rhs) const { return current_ != rhs.current_; }
 
     private:
         T* queue_;
@@ -156,14 +152,23 @@ public:
         size_t max_size_;
     };
 
-    iterator begin()
+    iterator begin() const
     {
         return iterator(queue_, front_, max_size_);
     }
 
-    iterator end()
+    iterator end() const
     {
         return iterator(queue_ + back_);
+    }
+
+    iterator find(T const& t) const
+    {
+        for (auto it = begin(); it != end(); ++it)
+            if (*it == t)
+                return it;
+
+        return end();
     }
 
     void resize(size_t new_size)

@@ -84,6 +84,26 @@ TEST_F(TestQueue, IteratorBegin)
     EXPECT_EQ(*q.begin(), elem);
 }
 
+TEST_F(TestQueue, IteratorWritable)
+{
+    int elem = 1;
+    q.enqueue(elem);
+    q.begin() = elem + 1;
+
+    EXPECT_EQ(*q.begin(), elem + 1);
+}
+
+TEST_F(TestQueue, IteratorAssignable)
+{
+    int elem = 1;
+    q.enqueue(elem);
+    q.enqueue(elem + 1);
+    auto it = q.begin();
+    it = ++q.begin();
+
+    EXPECT_EQ(*it, elem + 1);
+}
+
 TEST_F(TestQueue, IteratorRange)
 {
     size_t elems = 10;
@@ -95,6 +115,26 @@ TEST_F(TestQueue, IteratorRange)
         EXPECT_EQ(*it, i++);
 
     EXPECT_EQ(q.size(), elems);
+}
+
+TEST_F(TestQueue, IteratorFind)
+{
+    int elems = 10;
+    for (int i = 0; i < elems; i++)
+        q.enqueue(i);
+
+    auto it = q.find(elems / 2);
+    EXPECT_EQ(*it, elems / 2);
+}
+
+TEST_F(TestQueue, IteratorNotFind)
+{
+    int elems = 10;
+    for (int i = 0; i < elems; i++)
+        q.enqueue(i);
+
+    auto it = q.find(elems + 1);
+    EXPECT_EQ(it, q.end());
 }
 
 TEST_F(TestQueue, DequeueEmpty)
