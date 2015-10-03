@@ -27,9 +27,8 @@ namespace ds
 
 namespace
 {
-    size_t const default_max_size{2};
-    float const  default_increase_size{2};
-}
+size_t const default_max_size{2};
+float const  default_increase_size{2};
 
 static size_t increment(size_t index, size_t max)
 {
@@ -37,6 +36,7 @@ static size_t increment(size_t index, size_t max)
         return (index + 1) % max;
      else
          return ++index;
+}
 }
 
 template <typename T, typename Alloc = std::allocator<T>>
