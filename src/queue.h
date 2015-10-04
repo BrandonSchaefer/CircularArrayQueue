@@ -211,7 +211,7 @@ public:
         if (size() + 1 >= max_size_)
             resize(max_size_ * default_increase_size);
 
-        queue_[back_] = value;
+        allocator_.construct(&queue_[back_], value);
         back_ = increment(back_, max_size_);
     }
 
@@ -220,7 +220,7 @@ public:
         if (size() + 1 >= max_size_)
             resize(max_size_ * default_increase_size);
 
-        queue_[back_] = std::move(value);
+        allocator_.construct(&queue_[back_], std::move(value));
         back_ = increment(back_, max_size_);
     }
 
@@ -229,9 +229,8 @@ public:
         if (size() <= 0)
             throw std::out_of_range("Queue is empty, no elements left.");
 
-        auto elem = queue_[front_];
-        queue_[front_] = T{};
-        front_ = increment(front_, max_size_);
+        auto elem = std::move(queue_[front_]);
+        front_    = increment(front_, max_size_);
 
         return elem;
     }
