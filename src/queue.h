@@ -108,7 +108,7 @@ public:
     public:
         iterator(T* queue, size_t index = 0, size_t max_size = 0)
             : queue_(queue),
-              current_(queue),
+              current_(&queue[index]),
               index_(index),
               max_size_(max_size)
         {
@@ -117,7 +117,7 @@ public:
         iterator& operator++()
         {
             index_   = increment(index_, max_size_);
-            current_ = queue_ + index_;
+            current_ = &queue_[index_];
             return *this;
         }
 
@@ -125,7 +125,7 @@ public:
         {
             auto pre = *this;
             index_   = increment(index_, max_size_);
-            current_ = queue_ + index_;
+            current_ = &queue_[index_];
             return pre;
         }
 
