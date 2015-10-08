@@ -68,6 +68,16 @@ TEST_F(TestQueue, CopyAssignmentConstructor)
     EXPECT_TRUE(q2.empty());
 }
 
+TEST_F(TestQueue, InitListConstructor)
+{
+    ds::queue<int> q2 = {1,2,3};
+
+    EXPECT_EQ(q2.dequeue(), 1);
+    EXPECT_EQ(q2.dequeue(), 2);
+    EXPECT_EQ(q2.dequeue(), 3);
+    EXPECT_TRUE(q2.empty());
+}
+
 TEST_F(TestQueue, EnqueueDequeue)
 {
     int elem = 10;

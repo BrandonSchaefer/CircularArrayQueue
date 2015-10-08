@@ -68,7 +68,7 @@ public:
 
     // init_list ctor
     queue(std::initializer_list<T> const& s)
-        : queue_(allocator_.allocate(size + 1)),
+        : queue_(allocator_.allocate(s.size() + 1)),
           back_(s.size()),
           max_size_(s.size() + 1)
     {
